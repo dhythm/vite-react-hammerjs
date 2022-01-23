@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import logo from "./logo.svg";
+// import logo from "./logo.svg";
+import logo from "./logo.png";
 import "./App.css";
 import Hammer from "hammerjs";
 
@@ -71,13 +72,12 @@ function App() {
           <img
             {...(size && { ...size })}
             src={logo}
-            className="App-logo"
+            // className="App-logo"
             alt="logo"
             onLoad={onLoad}
           />
         </div>
         <p>{"size: " + JSON.stringify(size)}</p>
-        {/* <p>{"original size: " + JSON.stringify(orgSize)}</p> */}
         <p>Hello Vite + React!</p>
         <p>
           <button type="button" onClick={() => setCount((count) => count + 1)}>
