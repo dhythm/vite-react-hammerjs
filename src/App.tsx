@@ -5,67 +5,56 @@ import Hammer from "hammerjs";
 
 function App() {
   const [count, setCount] = useState(0);
-  const [orgSize, setOrgSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
   const [size, setSize] = useState<{
     width: number;
     height: number;
-  } | null>(orgSize);
-  const [text, setText] = useState("");
+  } | null>(null);
+  const [scale, setScale] = useState(1);
 
   const onLoad = () => {
     const img = document.getElementById("pinchable");
     if (!img) return;
-    setText(
-      "pinch: " +
-        JSON.stringify({
-          width: img.offsetWidth,
-          height: img.offsetHeight,
-        })
-    );
-    setOrgSize({ width: img.offsetWidth, height: img.offsetHeight });
-    setSize({ width: img.offsetWidth, height: img.offsetHeight });
+    const orgSize = { width: img.offsetWidth, height: img.offsetHeight };
 
     const hammertime = new Hammer.Manager(img);
     const pinch = new Hammer.Pinch();
     hammertime.add([pinch]);
 
+    let startSize: {
+      width: number;
+      height: number;
+    };
+    hammertime.on("pinchstart", (ev) => {
+      console.log("----- pinchstart -----");
+      startSize = { width: img.offsetWidth, height: img.offsetHeight };
+      setSize({ width: img.offsetWidth, height: img.offsetHeight });
+    });
     hammertime.on("pinch", (ev) => {
-      const imgWidth = img.offsetWidth;
-      const imgHeight = img.offsetHeight;
-      const scale = ev.scale;
-      const scaledWidth =
-        orgSize!.width >= imgWidth * scale
-          ? orgSize!.width
-          : orgSize!.width * 2 < imgWidth * scale
-          ? imgWidth * scale
-          : orgSize!.width * 2;
-      const scaledHeight =
-        orgSize!.height >= imgHeight * scale
-          ? orgSize!.height
-          : orgSize!.height * 2 < imgHeight * scale
-          ? imgHeight * scale
-          : orgSize!.height * 2;
+      const { scale } = ev;
+      const _scaledWidth = startSize.width * scale;
+      const _scaledHeight = startSize.height * scale;
 
-      console.log(`width: ${imgWidth}`);
-      console.log(`height: ${imgHeight}`);
-      console.log(`current width: ${scaledWidth}`);
-      console.log(`current height: ${scaledHeight}`);
-      setText(
-        "pinch: " +
-          JSON.stringify({
-            imgWidth,
-            imgHeight,
-            scaledWidth,
-            scaledHeight,
-          })
-      );
+      const scaledWidth =
+        _scaledWidth > orgSize.width * 2
+          ? orgSize.width * 2
+          : _scaledWidth < orgSize.width
+          ? orgSize.width
+          : _scaledWidth;
+      const scaledHeight =
+        _scaledHeight > orgSize.height * 2
+          ? orgSize.height * 2
+          : _scaledHeight < orgSize.height
+          ? orgSize.height
+          : _scaledHeight;
+
+      console.log("startSize: " + JSON.stringify(startSize));
       setSize({
-        width: scaledWidth,
-        height: scaledHeight,
+        width: Math.round(scaledWidth),
+        height: Math.round(scaledHeight),
       });
+    });
+    hammertime.on("pinchend", (ev) => {
+      console.log("----- pinchend -----");
     });
   };
 
@@ -79,10 +68,16 @@ function App() {
             textAlign: "center",
           }}
         >
-          <img src={logo} className="App-logo" alt="logo" onLoad={onLoad} />
+          <img
+            {...(size && { ...size })}
+            src={logo}
+            className="App-logo"
+            alt="logo"
+            onLoad={onLoad}
+          />
         </div>
-        <p>{JSON.stringify(size)}</p>
-        <p>{text}</p>
+        <p>{"size: " + JSON.stringify(size)}</p>
+        {/* <p>{"original size: " + JSON.stringify(orgSize)}</p> */}
         <p>Hello Vite + React!</p>
         <p>
           <button type="button" onClick={() => setCount((count) => count + 1)}>
