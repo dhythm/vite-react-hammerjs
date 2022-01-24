@@ -10,7 +10,6 @@ function App() {
     width: number;
     height: number;
   } | null>(null);
-  const [scale, setScale] = useState(1);
 
   const onLoad = () => {
     const img = document.getElementById("pinchable");
